@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.dashboard-layout {
+  min-height: 100vh;
+  background: #f8fafc;
+}

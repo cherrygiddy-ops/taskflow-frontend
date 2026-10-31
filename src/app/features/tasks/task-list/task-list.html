@@ -1,0 +1,187 @@
+
+<div class="dashboard-content">
+
+  <div class="page-header">
+    <div>
+      <h1>Task Management</h1>
+      <p>Organize your work and keep track of your progress.</p>
+    </div>
+
+    <button class="primary-button" (click)="openCreateForm()">
+      + Create New Task
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <div class="success-message">{{ successMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="error-message">{{ errorMessage }}</div>
+  }
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Tasks</span>
+      <h2>{{ totalTasks }}</h2>
+      <span class="stat-description">All your tasks</span>
+    </div>
+
+    <div class="stat-card pending">
+      <span class="stat-label">Pending</span>
+      <h2>{{ pendingTasks }}</h2>
+      <span class="stat-description">Awaiting action</span>
+    </div>
+
+    <div class="stat-card progress">
+      <span class="stat-label">In Progress</span>
+      <h2>{{ inProgressTasks }}</h2>
+      <span class="stat-description">Currently working on</span>
+    </div>
+
+    <div class="stat-card completed">
+      <span class="stat-label">Completed</span>
+      <h2>{{ completedTasks }}</h2>
+      <span class="stat-description">Successfully finished</span>
+    </div>
+  </section>
+
+  @if (showForm) {
+    <section class="form-panel">
+      <div class="form-header">
+        <div>
+          <h2>{{ editingTaskId ? 'Edit Task' : 'Create New Task' }}</h2>
+          <p>Enter the details of your task below.</p>
+        </div>
+
+        <button class="close-button" (click)="closeForm()">✕</button>
+      </div>
+
+      <form (ngSubmit)="saveTask()">
+        <div class="form-group">
+          <label for="title">Task title</label>
+          <input
+            id="title"
+            type="text"
+            name="title"
+            [(ngModel)]="title"
+            placeholder="Enter task title"
+            minlength="3"
+            maxlength="100"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="description"
+            placeholder="Describe your task..."
+            rows="4"
+            maxlength="1000"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="status" [(ngModel)]="status">
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="closeForm()">
+            Cancel
+          </button>
+
+          <button type="submit" class="primary-button" [disabled]="saving">
+            {{ saving ? 'Saving...' : editingTaskId ? 'Update Task' : 'Create Task' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  <section class="task-section">
+    <div class="section-header">
+      <div>
+        <h2>All Tasks</h2>
+        <p>Manage and monitor your tasks.</p>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input
+        type="search"
+        placeholder="Search tasks..."
+        [(ngModel)]="searchTerm"
+        name="search"
+      />
+
+      <select [(ngModel)]="statusFilter" name="statusFilter">
+        <option value="all">All statuses</option>
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+
+    @if (loading) {
+      <div class="empty-state">Loading tasks...</div>
+    } @else if (filteredTasks.length === 0) {
+      <div class="empty-state">
+        <h3>No tasks found</h3>
+        <p>Try another search or create a new task.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (task of filteredTasks; track task._id) {
+              <tr>
+                <td>
+                  <div class="task-title">{{ task.title }}</div>
+                  <div class="task-description">{{ task.description || 'No description' }}</div>
+                </td>
+
+                <td>
+                  <span class="status-badge" [ngClass]="task.status">
+                    {{ task.status === 'in-progress' ? 'In Progress' : (task.status | titlecase) }}
+                  </span>
+                </td>
+
+                <td>{{ task.createdAt | date:'mediumDate' }}</td>
+
+                <td>
+                  <div class="action-buttons">
+                    <button class="edit-button" (click)="openEditForm(task)">
+                      Edit
+                    </button>
+
+                    <button class="delete-button" (click)="deleteTask(task._id)">
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+</div>
